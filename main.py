@@ -56,7 +56,7 @@ tempoAnimacaoJump = 0.0
 velocidadeAnimacaoJump = 5
 
 # Retangulo do personagem na tela para melhor controle e posicionamento do personagem
-personagemRect = listFramesIdle[0].get_rect(midbottom=(100, 480))
+personagemRect = listFramesIdle[0].get_rect(midbottom=(250, 480))
 
 gravidade = 1 # Gravidade do jogo, valor que aumenta a cada frame
 direcaoPersonagem = 1 # Direção que o personagem está olhando (1 = Direita, -1 = Esquerda)
@@ -73,9 +73,11 @@ listBgimages = [
     pygame.image.load("assets/Apocalipse/apocalipse1/Bright/road.png").convert_alpha(),
 ]
 
-listaBgVelocidades = [1, 3, 5, 9, 12, 15, 16] # velocidades de cada imagem dp plano de fundo
+# velocidades de cada imagem dp plano de fundo
+listaBgVelocidades = [1, 3, 5, 9, 12, 15, 16] 
 
-listaBgPosicoes = [0 for _ in range(len(listBgimages))] # Posições de cada imagem do plamo de fundo
+# Posições de cada imagem do plamo de fundo
+listaBgPosicoes = [0 for _ in range(len(listBgimages))] 
 
 #loop que redimenciona as imagens do plano de fundo
 for i in range(len(listBgimages)):
@@ -83,6 +85,7 @@ for i in range(len(listBgimages)):
 
 #Variável para determinar altura do personagem em relação ao "Chão"
 ALTURA_CHAO = 530
+VELOCIDADE_PERSONAGEM = 10
 
 # LOOP PRINCIPAL
 while True:
@@ -99,19 +102,29 @@ while True:
 
     # Percorre todas as imagens do plano para movimentar
     for i in range(len(listBgimages)):
-        listaBgPosicoes[i] -= listaBgVelocidades[i] * 10 * dt # move a imagem para a esquerda
+        if estaAndando:
+            # move a imagem para a esquerda
+            listaBgPosicoes[i] -= listaBgVelocidades[i] * VELOCIDADE_PERSONAGEM * dt *  direcaoPersonagem 
 
-        #verifica se a imagem saiu da tela
+        #verifica se a imagem saiu da tela para a esquerda
         if listaBgPosicoes[i] <= -tamanho[0]:
             listaBgPosicoes[i] = 0 #Retorna a imagem para a posição inicial
+
+        #verifica se a imagem saiu da tela para a direita
+        if listaBgPosicoes[i] >= tamanho[0]:
+            listaBgPosicoes[i] = 0  
 
     # Desenha o plano de fundo
     for i in range(len(listBgimages)):
         # Desenha a imagem do plano de fundo que está na tela
         tela.blit(listBgimages[i], (listaBgPosicoes[i],0))
 
-        # Desenha a imagem do plano de fundo que esta fora da tela
+        # Desenha a imagem do plano de fundo que esta fora da tela na direita
         tela.blit(listBgimages[i], (listaBgPosicoes[i] + tamanho[0], 0))
+
+        # Desenha a iamgem do plano de fundo que esta fora da tela na esquerda
+        tela.blit(listBgimages[i], (listaBgPosicoes[i] + -tamanho[0], 0))
+
 
     # Soma o tempo que se passou desde o último frame
     tempoAnimacaoIdle += dt
@@ -158,11 +171,11 @@ while True:
 
     if listTeclas[pygame.K_SPACE]: # Verifica se a tecla espaço foi pressionada
         if personagemRect.centery == ALTURA_CHAO: # Verifica se o personagem está no chão
-            gravidade = -50 # Define como negativo para o personagem subir
+            gravidade = -30 # Define como negativo para o personagem subir
             indexFrameJump = 0 # Reseta o frame do pulo
 
     # Gravidade Aumenta
-    gravidade += 3
+    gravidade += 2
 
     # Atualiza a posição Y do personagem de acordo com a gravidade
     personagemRect.y += gravidade
