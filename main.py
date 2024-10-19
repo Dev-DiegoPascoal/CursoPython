@@ -9,15 +9,20 @@ tela = pygame.display.set_mode(tamanho)
 pygame.display.set_caption("Homeless Walker")
 dt = 0
 
+#Carrega a fonte a ser usada no jogo 
+fontTempo = pygame.font.Font("asents/Fonts/EnergyStation/EnergyStation.ttf", 80)
+
 # Carrega a spritesheet para nosso projeto
 folhaSpritesIdle = pygame.image.load("assets/Homeless_1/Idle_2.png").convert_alpha()
 folhaSpritesWalk = pygame.image.load("assets/Homeless_1/Walk.png").convert_alpha()
 folhaSpritesJump = pygame.image.load("assets/Homeless_1/Jump.png").convert_alpha()
+folhaSpritRunn = pygame.image.load("assets/Homelles_1/Run.png").convert_alpha()
 
 # Define os frames
 listFramesIdle = []
 listFramesWalk = []
 listFramesJump = []
+listFramesRunn = []
 
 # Cria os frames do personagem na lista de listFramesIdle
 for i in range(11):
@@ -34,6 +39,11 @@ for i in range(8):
     frame = folhaSpritesWalk.subsurface(i * 128, 0, 128, 128)
     frame = pygame.transform.scale(frame, (256, 256))
     listFramesWalk.append(frame)
+
+for i in range(8):
+    frame = folhaSpritRunn.subsurface(i * 128, 0, 128, 128)
+    frame = pygame.transform.scale(frame, (256, 256))
+    listFramesRunn.append(frame)
 
 for i in range(9):
     frame = folhaSpritesJump.subsurface(i * 128, 0, 128, 128)
@@ -54,6 +64,11 @@ velocidadeAnimacaoWalk = 10
 indexFrameJump = 0
 tempoAnimacaoJump = 0.0
 velocidadeAnimacaoJump = 5
+
+# Variavéis da animação do personagem correndo
+indexFrameRunn = 0
+tempoAnimacaoRunn = 0.0
+velocidadeAnimacaoRunn = 10
 
 # Retangulo do personagem na tela para melhor controle e posicionamento do personagem
 personagemRect = listFramesIdle[0].get_rect(midbottom=(250, 480))
