@@ -73,6 +73,10 @@ listBgimages = [
     pygame.image.load("assets/Apocalipse/apocalipse1/Bright/road.png").convert_alpha(),
 ]
 
+listaBgVelocidades = [1, 3, 5, 9, 12, 15, 16] # velocidades de cada imagem dp plano de fundo
+
+listaBgPosicoes = [0 for _ in range(len(listBgimages))] # Posições de cada imagem do plamo de fundo
+
 #loop que redimenciona as imagens do plano de fundo
 for i in range(len(listBgimages)):
     listBgimages[i] = pygame.transform.scale(listBgimages[i], tamanho)
@@ -93,9 +97,21 @@ while True:
 
     tela.fill((255, 255, 255)) # Preenche a tela com a cor branca
 
+    # Percorre todas as imagens do plano para movimentar
+    for i in range(len(listBgimages)):
+        listaBgPosicoes[i] -= listaBgVelocidades[i] * 10 * dt # move a imagem para a esquerda
+
+        #verifica se a imagem saiu da tela
+        if listaBgPosicoes[i] <= -tamanho[0]:
+            listaBgPosicoes[i] = 0 #Retorna a imagem para a posição inicial
+
     # Desenha o plano de fundo
     for i in range(len(listBgimages)):
-        tela.blit(listBgimages[i],(0,0))
+        # Desenha a imagem do plano de fundo que está na tela
+        tela.blit(listBgimages[i], (listaBgPosicoes[i],0))
+
+        # Desenha a imagem do plano de fundo que esta fora da tela
+        tela.blit(listBgimages[i], (listaBgPosicoes[i] + tamanho[0], 0))
 
     # Soma o tempo que se passou desde o último frame
     tempoAnimacaoIdle += dt
