@@ -25,13 +25,14 @@ folhaSpritesIdle = pygame.image.load("assets/Homeless_1/Idle_2.png").convert_alp
 folhaSpritesWalk = pygame.image.load("assets/Homeless_1/Walk.png").convert_alpha()
 folhaSpritesJump = pygame.image.load("assets/Homeless_1/Jump.png").convert_alpha()
 folhaSpritesRunn = pygame.image.load("assets/Homeless_1/Run.png").convert_alpha()
-
+folhaSpritesDead = pygame.image.load("assets/Homeless_1/Dead.png").convert_alpha()
 
 # Define os frames
 listFramesIdle = []
 listFramesWalk = []
 listFramesJump = []
 listFramesRunn = []
+listFramesDead = []
 
 # Cria os frames do personagem na lista de listFramesIdle
 for i in range(11):
@@ -59,6 +60,11 @@ for i in range(8):
     frame = pygame.transform.scale(frame, (256, 256))
     listFramesRunn.append(frame)
 
+for i in range(4):
+    frame = folhaSpritesDead.subsurface(i * 128, 0, 128, 128)
+    frame = pygame.transform.scale(frame, (256, 256))
+    listFramesDead.append(frame)
+
 # Variaveis da animação do personagem parado
 indexFrameIdle = 0 # Controla qual imagem está sendo mostrada na tela
 tempoAnimacaoIdle = 0.0 # Controla quanto tempo se passou desde a última troca de frame
@@ -78,6 +84,11 @@ velocidadeAnimacaoJump = 5
 indexFrameRunn = 0
 tempoAnimacaoRunn = 0.0
 velocidadeAnimacaoRunn = 10
+
+# Variaveis da animação do personagem morto
+indexFrameDead = 0
+tempoAnimacaoDead = 0.0
+velocidadeAnimacaoDead = 3
 
 # Retangulo do personagem na tela para melhor controle e posicionamento do personagem
 personagemRect = listFramesIdle[0].get_rect(midbottom=(250, 480))
@@ -159,15 +170,16 @@ while True:
             #Atualiza a tela após processar todos os eventos
             pygame.display.flip()
 
-        if event.type == AUMENTA_DIFICULDADE:
-            velocidadePersonagem += 4
+        if not GameOver:
+            if event.type == AUMENTA_DIFICULDADE:
+                velocidadePersonagem += 4
 
-            if tempoMaximoEntreObstaculos > 1100:
-                tempoMaximoEntreObstaculos -= 300
+                if tempoMaximoEntreObstaculos > 1100:
+                    tempoMaximoEntreObstaculos -= 300
 
                 pygame.time.set_timer(ADICIONA_OBSTACULO, randint(800, tempoMaximoEntreObstaculos))
 
-        if event.type == ADICIONA_OBSTACULO:
+            if event.type == ADICIONA_OBSTACULO:
                 obstaculoImage = listaImagensObstaculos[randint(0, len(listaImagensObstaculos) - 1)]
                 posicaoX = randint(1280, 1500)
                 obstaculoRect = obstaculoImage.get_rect(midbottom=(posicaoX, 620))
@@ -228,7 +240,7 @@ while True:
         # Cria o texto para o menu de reiniciar o jogo
         textoGameOver = fonteTempo.render("JAH ERA!", False, (255, 255, 255))
         textoReiniciar = fonteTempo.render("APERTE ENTER PARA REINICIAR", False, (255, 255, 255))
-
+       
         # Desenha o menu de reiniciar o jogo na tela
         tela.blit(textoGameOver, (484, 260))
         tela.blit(textoReiniciar, (84, 360))
@@ -284,6 +296,15 @@ while True:
         indexFrameRunn = (indexFrameRunn + 1) % len(listFramesRunn)
         tempoAnimacaoRunn = 0.0
 
+     # Atualiza a animação do personagem morto
+    if GameOver and indexFrameDead != len(listFramesDead) - 1:
+        tempoAnimacaoDead += dt
+    # Verifica se o tempo de animação do personagem morto é maior ou igual ao tempo de animação
+    if tempoAnimacaoDead >= 1 / velocidadeAnimacaoDead:
+        # Atualiza o frame do personagem morto
+        indexFrameDead = (indexFrameDead + 1) % len(listFramesDead)
+        tempoAnimacaoDead = 0.0    
+
     # Verifica se o personagem está andando
     estaAndando = False
 
@@ -304,6 +325,7 @@ while True:
                 gravidade = -30 # Define como negativo para o personagem subir
                 indexFrameJump = 0 # Reseta o frame do pulo
     else:
+        # Reinicia o jogo
         if listTeclas[pygame.K_RETURN]:
             vidas = 3
             GameOver = False
@@ -311,6 +333,7 @@ while True:
             velocidadePersonagem = 30
             tempoMaximoEntreObstaculos = 3000
             listaObstaculos = []
+            indexFrameDead = 0
 
     # Gravidade Aumenta
     gravidade += 2
@@ -324,25 +347,27 @@ while True:
 
     personagemColisaoRect.midbottom = personagemRect.midbottom
 
-
     # Desenha o personagem
-    if gravidade < 0: # Verifica se o personagem está subindo
-        frame = listFramesJump[indexFrameJump]
+    if not GameOver:
+        if gravidade < 0: # Verifica se o personagem está subindo
+            frame = listFramesJump[indexFrameJump]
+        else:
+            if estaAndando: # Verifica se o personagem está andando
+                if velocidadePersonagem < 40:
+                    frame = listFramesWalk[indexFrameWalk]
+                if velocidadePersonagem < 50:
+                    frame = listFramesRunn[indexFrameRunn]
+                elif velocidadePersonagem < 70:
+                    velocidadeAnimacaoRunn = 30
+                    frame = listFramesRunn[indexFrameRunn]
+                else:
+                    velocidadeAnimacaoRunn = 40
+                    frame = listFramesRunn[indexFrameRunn]
+                
+            else: # Caso contrário, o personagem está parado
+                frame = listFramesIdle[indexFrameIdle]
     else:
-        if estaAndando: # Verifica se o personagem está andando
-            if velocidadePersonagem < 40:
-                frame = listFramesWalk[indexFrameWalk]
-            if velocidadePersonagem < 50:
-                frame = listFramesRunn[indexFrameRunn]
-            elif velocidadePersonagem < 70:
-                velocidadeAnimacaoRunn = 30
-                frame = listFramesRunn[indexFrameRunn]
-            else:
-                velocidadeAnimacaoRunn = 40
-                frame = listFramesRunn[indexFrameRunn]
-            
-        else: # Caso contrário, o personagem está parado
-            frame = listFramesIdle[indexFrameIdle]
+        frame = listFramesDead[indexFrameDead]
 
     if direcaoPersonagem == -1: # Verifica se o personagem está olhando para a esquerda e inverte a imagem
         frame = pygame.transform.flip(frame, True, False) # Inverte a imagem
